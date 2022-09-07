@@ -43,22 +43,40 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-/* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .stack_size = 3000 * 4,
+/* Definitions for conn_handler */
+osThreadId_t conn_handlerHandle;
+const osThreadAttr_t conn_handler_attributes = {
+  .name = "conn_handler",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityRealtime7,
+};
+/* Definitions for send_tcp_data */
+osThreadId_t send_tcp_dataHandle;
+const osThreadAttr_t send_tcp_data_attributes = {
+  .name = "send_tcp_data",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityRealtime7,
+};
+/* Definitions for tcp_recv */
+osThreadId_t tcp_recvHandle;
+const osThreadAttr_t tcp_recv_attributes = {
+  .name = "tcp_recv",
+  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityRealtime7,
 };
 /* USER CODE BEGIN PV */
 struct netconn *conn, *newconn;
+uint8_t listening = 0;
+uint8_t connected = 0;
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-void StartDefaultTask(void *argument);
+void start_conn_handler(void *argument);
+void start_send_tcp_data(void *argument);
+void start_tcp_recv(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -121,8 +139,14 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  /* creation of conn_handler */
+  conn_handlerHandle = osThreadNew(start_conn_handler, NULL, &conn_handler_attributes);
+
+  /* creation of send_tcp_data */
+  send_tcp_dataHandle = osThreadNew(start_send_tcp_data, NULL, &send_tcp_data_attributes);
+
+  /* creation of tcp_recv */
+  tcp_recvHandle = osThreadNew(start_tcp_recv, NULL, &tcp_recv_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -228,17 +252,31 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void netconn_init(struct netconn *conn_to_init) {
+  ip_addr_t local_ip;
+  IP4_ADDR(&local_ip, 10, 42, 0, 32);
 
+  err_t err;
+  do {
+    err = netconn_bind(conn_to_init, &local_ip, 30);
+  } while (err != ERR_OK);
+
+  do {
+    err = netconn_listen(conn_to_init);
+  } while (err != ERR_OK);
+
+  listening = 1;
+}
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartDefaultTask */
+/* USER CODE BEGIN Header_start_conn_handler */
 /**
-  * @brief  Function implementing the defaultTask thread.
+  * @brief  Function implementing the conn_handler thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
+/* USER CODE END Header_start_conn_handler */
+void start_conn_handler(void *argument)
 {
   /* init code for LWIP */
   MX_LWIP_Init();
@@ -246,40 +284,30 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   struct netif *gnetif = get_static_netif();
 
-//  ethernetif_input(gnetif);
-//  sys_check_timeouts();
-//  ethernet_link_check_state(gnetif);
-
-  ip_addr_t local_ip;
-  IP4_ADDR(&local_ip, 10, 42, 0, 32);
-
   conn = NULL;
-
   conn = netconn_new(NETCONN_TCP);
 
-  uint8_t flag = 0;
+  netconn_init(conn);
   err_t err;
-  do {
-    err = netconn_bind(conn, &local_ip, 30);
-  } while (err != ERR_OK);
 
-  do {
-    err = netconn_listen(conn);
-  } while (err != ERR_OK);
+  ethernetif_input(gnetif);
+  sys_check_timeouts();
+  ethernet_link_check_state(gnetif);
 
-     ethernetif_input(gnetif);
-     sys_check_timeouts();
-     ethernet_link_check_state(gnetif);
-
-  void* data = "hello\n";
-  size_t len = 6;
   for(;;) {
-     osDelay(1);
-     err = netconn_accept(conn, &newconn);
+    osDelay(10);
 
-     // able to connect, unable to send data, haven't tried receiving
-     while (err == ERR_OK)
-      netconn_write(newconn, data, len, NETCONN_NOCOPY);
+    err = netconn_accept(conn, &newconn);
+    if (err == ERR_OK) {
+      connected = 1;
+    } else
+      connected = 0;
+
+/*
+    while (connected == 1) {
+    	osDelay(100);
+    }
+*/
   }
 
 
@@ -288,6 +316,54 @@ void StartDefaultTask(void *argument)
   }
   netconn_delete(newconn);
   /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_start_send_tcp_data */
+/**
+* @brief Function implementing the send_tcp_data thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_start_send_tcp_data */
+void start_send_tcp_data(void *argument)
+{
+  /* USER CODE BEGIN start_send_tcp_data */
+  char *buf = NULL;
+  uint16_t buflen;
+  err_t err;
+
+
+  const char data[] = "Hello world\n";
+  /* Infinite loop */
+  for(;;) {
+  	osDelay(50);
+
+	if (1) {
+      err = netconn_write(newconn, data, sizeof(data)-1, NETCONN_NOCOPY);
+      if (err == ERR_OK) {
+      }
+	}
+    osDelay(5);
+  }
+  /* USER CODE END start_send_tcp_data */
+}
+
+/* USER CODE BEGIN Header_start_tcp_recv */
+/**
+* @brief Function implementing the tcp_recv thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_start_tcp_recv */
+void start_tcp_recv(void *argument)
+{
+  /* USER CODE BEGIN start_tcp_recv */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END start_tcp_recv */
 }
 
 /**

@@ -50,6 +50,13 @@ const osThreadAttr_t conn_handler_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityRealtime7,
 };
+/* Definitions for motor_control */
+osThreadId_t motor_controlHandle;
+const osThreadAttr_t motor_control_attributes = {
+  .name = "motor_control",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityRealtime7,
+};
 /* USER CODE BEGIN PV */
 struct netconn *conn, *newconn;
 uint8_t listening = 0;
@@ -61,6 +68,7 @@ uint8_t connected = 0;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 void start_conn_handler(void *argument);
+void start_motor_control(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -125,6 +133,9 @@ int main(void)
   /* Create the thread(s) */
   /* creation of conn_handler */
   conn_handlerHandle = osThreadNew(start_conn_handler, NULL, &conn_handler_attributes);
+
+  /* creation of motor_control */
+  motor_controlHandle = osThreadNew(start_motor_control, NULL, &motor_control_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -289,6 +300,24 @@ void start_conn_handler(void *argument)
   }
   netconn_delete(newconn);
   /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_start_motor_control */
+/**
+* @brief Function implementing the motor_control thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_start_motor_control */
+void start_motor_control(void *argument)
+{
+  /* USER CODE BEGIN start_motor_control */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END start_motor_control */
 }
 
 /**

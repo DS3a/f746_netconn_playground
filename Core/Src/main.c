@@ -278,6 +278,7 @@ void start_conn_handler(void *argument)
     err = netconn_accept(conn, &newconn);
     if (err == ERR_OK) {
       connected = 1;
+
     } else
       connected = 0;
   }

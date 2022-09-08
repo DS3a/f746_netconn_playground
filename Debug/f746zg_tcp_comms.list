@@ -857,6 +857,7 @@ void start_conn_handler(void *argument)
  8000844:	2201      	movs	r2, #1
  8000846:	701a      	strb	r2, [r3, #0]
  8000848:	e7ec      	b.n	8000824 <start_conn_handler+0x44>
+
     } else
       connected = 0;
  800084a:	4b04      	ldr	r3, [pc, #16]	; (800085c <start_conn_handler+0x7c>)

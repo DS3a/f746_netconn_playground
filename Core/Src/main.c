@@ -50,20 +50,6 @@ const osThreadAttr_t conn_handler_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityRealtime7,
 };
-/* Definitions for send_tcp_data */
-osThreadId_t send_tcp_dataHandle;
-const osThreadAttr_t send_tcp_data_attributes = {
-  .name = "send_tcp_data",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityRealtime7,
-};
-/* Definitions for tcp_recv */
-osThreadId_t tcp_recvHandle;
-const osThreadAttr_t tcp_recv_attributes = {
-  .name = "tcp_recv",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityRealtime7,
-};
 /* USER CODE BEGIN PV */
 struct netconn *conn, *newconn;
 uint8_t listening = 0;
@@ -75,8 +61,6 @@ uint8_t connected = 0;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 void start_conn_handler(void *argument);
-void start_send_tcp_data(void *argument);
-void start_tcp_recv(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -141,12 +125,6 @@ int main(void)
   /* Create the thread(s) */
   /* creation of conn_handler */
   conn_handlerHandle = osThreadNew(start_conn_handler, NULL, &conn_handler_attributes);
-
-  /* creation of send_tcp_data */
-  send_tcp_dataHandle = osThreadNew(start_send_tcp_data, NULL, &send_tcp_data_attributes);
-
-  /* creation of tcp_recv */
-  tcp_recvHandle = osThreadNew(start_tcp_recv, NULL, &tcp_recv_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -302,12 +280,6 @@ void start_conn_handler(void *argument)
       connected = 1;
     } else
       connected = 0;
-
-/*
-    while (connected == 1) {
-    	osDelay(100);
-    }
-*/
   }
 
 
@@ -316,54 +288,6 @@ void start_conn_handler(void *argument)
   }
   netconn_delete(newconn);
   /* USER CODE END 5 */
-}
-
-/* USER CODE BEGIN Header_start_send_tcp_data */
-/**
-* @brief Function implementing the send_tcp_data thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_start_send_tcp_data */
-void start_send_tcp_data(void *argument)
-{
-  /* USER CODE BEGIN start_send_tcp_data */
-  char *buf = NULL;
-  uint16_t buflen;
-  err_t err;
-
-
-  const char data[] = "Hello world\n";
-  /* Infinite loop */
-  for(;;) {
-  	osDelay(50);
-
-	if (1) {
-      err = netconn_write(newconn, data, sizeof(data)-1, NETCONN_NOCOPY);
-      if (err == ERR_OK) {
-      }
-	}
-    osDelay(5);
-  }
-  /* USER CODE END start_send_tcp_data */
-}
-
-/* USER CODE BEGIN Header_start_tcp_recv */
-/**
-* @brief Function implementing the tcp_recv thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_start_tcp_recv */
-void start_tcp_recv(void *argument)
-{
-  /* USER CODE BEGIN start_tcp_recv */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END start_tcp_recv */
 }
 
 /**

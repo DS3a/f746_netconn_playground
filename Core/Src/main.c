@@ -281,7 +281,7 @@ void start_conn_handler(void *argument)
 
   ethernetif_input(gnetif);
   sys_check_timeouts();
-  ethernet_link_check_state(gnetif);
+  connected = 1;
 
   for(;;) {
     osDelay(10);
@@ -291,7 +291,7 @@ void start_conn_handler(void *argument)
       connected = 1;
 
     } else
-      connected = 0;
+      connected = 1;
   }
 
 
@@ -315,7 +315,9 @@ void start_motor_control(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	if (connected == 1)
+      HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+    osDelay(100);
   }
   /* USER CODE END start_motor_control */
 }

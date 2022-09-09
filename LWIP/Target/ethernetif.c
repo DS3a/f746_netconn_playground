@@ -119,6 +119,13 @@ ETH_DMADescTypeDef DMATxDscrTab[ETH_TX_DESC_CNT] __attribute__((section(".TxDecr
 #endif
 
 /* USER CODE BEGIN 2 */
+//__attribute__ ((section(".RxDescription"), used)) ETH_DMADescTypeDef DMARxDscrTab[ETH_RXBUFNB] __ALIGN_END;
+//
+//__attribute__ ((section(".TxDescription"), used)) ETH_DMADescTypeDef DMATxDscrTab[ETH_TXBUFNB] __ALIGN_END;
+//
+//__attribute__ ((section(".RxArraySection"), used)) uint8_t Rx_Buff[ETH_RXBUFNB][ETH_RX_BUF_SIZE] __ALIGN_END;
+//
+//__attribute__ ((section(".TxArraySection"), used)) uint8_t Tx_Buff[ETH_TXBUFNB][ETH_TX_BUF_SIZE] __ALIGN_END;
 
 /* USER CODE END 2 */
 

@@ -1,0 +1,8 @@
+../Core/Src/main.c:334:6:start_motor_control	8	static
+../Core/Src/main.c:354:6:start_tcp_thread	8	static
+../Core/Src/main.c:178:6:SystemClock_Config	88	static,ignoring_inline_asm
+../Core/Src/main.c:94:5:main	48	static
+../Core/Src/main.c:255:6:netconn_init	16	static
+../Core/Src/main.c:279:6:start_conn_handler	16	static
+../Core/Src/main.c:377:6:HAL_TIM_PeriodElapsedCallback	0	static
+../Core/Src/main.c:394:6:Error_Handler	0	static,ignoring_inline_asm

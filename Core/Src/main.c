@@ -57,6 +57,13 @@ const osThreadAttr_t motor_control_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityRealtime7,
 };
+/* Definitions for tcp_thread */
+osThreadId_t tcp_threadHandle;
+const osThreadAttr_t tcp_thread_attributes = {
+  .name = "tcp_thread",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityRealtime7,
+};
 /* USER CODE BEGIN PV */
 struct netconn *conn, *newconn;
 uint8_t listening = 0;
@@ -69,6 +76,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 void start_conn_handler(void *argument);
 void start_motor_control(void *argument);
+void start_tcp_thread(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -136,6 +144,9 @@ int main(void)
 
   /* creation of motor_control */
   motor_controlHandle = osThreadNew(start_motor_control, NULL, &motor_control_attributes);
+
+  /* creation of tcp_thread */
+  tcp_threadHandle = osThreadNew(start_tcp_thread, NULL, &tcp_thread_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -231,12 +242,22 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
+
   /*Configure GPIO pin : LED_Pin */
   GPIO_InitStruct.Pin = LED_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PC9 */
+  GPIO_InitStruct.Pin = GPIO_PIN_9;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 }
 
@@ -271,7 +292,6 @@ void start_conn_handler(void *argument)
   MX_LWIP_Init();
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
-  struct netif *gnetif = get_static_netif();
 
   conn = NULL;
   conn = netconn_new(NETCONN_TCP);
@@ -279,8 +299,6 @@ void start_conn_handler(void *argument)
   netconn_init(conn);
   err_t err;
 
-  ethernetif_input(gnetif);
-  sys_check_timeouts();
   connected = 1;
 
   for(;;) {
@@ -288,7 +306,18 @@ void start_conn_handler(void *argument)
 
     err = netconn_accept(conn, &newconn);
     if (err == ERR_OK) {
-      connected = 1;
+      connected = 0;
+      /*
+             while (netconn_recv(newconn, &buf) == ERR_OK) {
+        do {
+          strncpy(msg, buf->p->payload, buf->p->len);
+          int len = sprintf (smsg, "\"%s\" was sent by the Server\n", msg);
+          netconn_write(newconn, smsg, len, NETCONN_COPY);  // send the message back to the client
+          memset (msg, '\0', 100);  // clear the buffer
+        } while(netbuf_next(buf) > 0);
+        netbuf_delete(buf);
+      }
+       */
 
     } else
       connected = 1;
@@ -320,6 +349,28 @@ void start_motor_control(void *argument)
     osDelay(100);
   }
   /* USER CODE END start_motor_control */
+}
+
+/* USER CODE BEGIN Header_start_tcp_thread */
+/**
+* @brief Function implementing the tcp_thread thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_start_tcp_thread */
+void start_tcp_thread(void *argument)
+{
+  /* USER CODE BEGIN start_tcp_thread */
+  struct netif *gnetif = get_static_netif();
+  ethernetif_input(gnetif);
+  sys_check_timeouts();
+
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END start_tcp_thread */
 }
 
 /**

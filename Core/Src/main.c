@@ -303,6 +303,12 @@ void start_conn_handler(void *argument)
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
 
+  tcpclient_init();
+  for (;;) {
+    osDelay(1);
+  }
+
+  /*
   conn = NULL;
   conn = netconn_new(NETCONN_TCP);
 
@@ -320,7 +326,7 @@ void start_conn_handler(void *argument)
 
     err = netconn_accept(conn, &newconn);
     if (err == ERR_OK) {
-      connected = 1;
+      connected = 1; */
       // TODO sort the receive function
       // PROBLEM:
       /*
@@ -341,6 +347,7 @@ void start_conn_handler(void *argument)
         } while(netbuf_next(buf) > 0);
         netbuf_delete(buf);
       }*/
+  /*
     } else
       connected = 0;
   }
@@ -349,8 +356,9 @@ void start_conn_handler(void *argument)
   for(;;) {
     osDelay(1);
   }
-  netconn_delete(newconn);
+  netconn_delete(newconn);*/
   /* USER CODE END 5 */
+
 }
 
 /* USER CODE BEGIN Header_start_motor_control */
@@ -366,7 +374,7 @@ void start_motor_control(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	if (connected == 1)
+	if (1)
       HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
     osDelay(100);
   }

@@ -373,9 +373,17 @@ void start_motor_control(void *argument)
   /* USER CODE BEGIN start_motor_control */
   /* Infinite loop */
   for(;;)
-  {
-	if (1)
-      HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+  {/*
+    float *del = get_linear_x();
+    if (*del >= 0) {
+    	*del = 0;
+    }
+    (*del)*=100;
+    int dela = (int)(*del);
+    if (dela == 0) {
+    	dela = 10;
+    }*/
+    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
     osDelay(100);
   }
   /* USER CODE END start_motor_control */

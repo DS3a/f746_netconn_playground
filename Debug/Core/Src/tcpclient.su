@@ -1,4 +1,7 @@
-../Core/Src/tcpclient.c:30:13:tcpinit_thread	24	static
-../Core/Src/tcpclient.c:104:6:tcpsend	32	static
-../Core/Src/tcpclient.c:113:13:tcpsend_thread	16	static
-../Core/Src/tcpclient.c:129:6:tcpclient_init	16	static
+../Core/Src/tcpclient.c:29:8:fun	32	static
+../Core/Src/tcpclient.c:51:8:get_linear_x	4	static
+../Core/Src/tcpclient.c:55:8:get_angular_z	4	static
+../Core/Src/tcpclient.c:62:13:tcpinit_thread	24	static
+../Core/Src/tcpclient.c:139:6:tcpsend	32	static
+../Core/Src/tcpclient.c:148:13:tcpsend_thread	16	static
+../Core/Src/tcpclient.c:164:6:tcpclient_init	16	static

@@ -13,16 +13,48 @@
 
 #include "tcpclient.h"
 #include "string.h"
+
+#include <stdlib.h>
+
 static struct netconn *conn;
 static struct netbuf *buf;
 static ip_addr_t *addr, dest_addr;
 static unsigned short port, dest_port;
-char msgc[100];
+char msgc[200];
 char smsgc[200];
 int indx = 0;
+float linear_x=0, angular_z=0;
+
+
+float *fun(char string[])
+{
+    static float res[10];
+    char *token;
+    int count=0;
+    token = strtok(string,",");
+    float x;
+    // res[0] = atof(token);
+    while (token)
+    {
+        x = atof(token);
+        res[count] = x;
+        // printf("%f ",x);
+        count+=1;
+        token = strtok(NULL,",");
+    }
+    return res;
+}
 
 // Function to send the data to the server
 void tcpsend (char *data);
+
+float *get_linear_x() {
+    return &linear_x;
+}
+
+float *get_angular_z() {
+	return &angular_z;
+}
 
 // tcpsem is the binary semaphore to prevent the access to tcpsend
 sys_sem_t tcpsem;
@@ -68,18 +100,21 @@ static void tcpinit_thread(void *arg)
 
 							strncpy (msgc, buf->p->payload, buf->p->len);   // get the message from the server
 
+							float *linx = fun(msgc);
+							linear_x = *(linx);
+							angular_z = *(linx+1);
 							// Or modify the message received, so that we can send it back to the server
-//							sprintf (smsgc, "\"%s\" was sent by the Server\n", msgc);
+							sprintf (smsgc, "Server: ", msgc);
 
 							// semaphore must be taken before accessing the tcpsend function
-							sys_arch_sem_wait(&tcpsem, 500);
+							sys_arch_sem_wait(&tcpsem, 5);
 
 							// send the data to the TCP Server
 							tcpsend (smsgc);
 
 							memset (msgc, '\0', 100);  // clear the buffer
 						}
-						while (netbuf_next(buf) >0);
+						while (netbuf_next(buf) > 0);
 
 						netbuf_delete(buf);
 					}
@@ -114,9 +149,9 @@ static void tcpsend_thread (void *arg)
 {
 	for (;;)
 	{
-		sprintf (smsgc, "index value = %d\n", indx++);
+		sprintf (smsgc, "index value = %d\n", indx);
 		// semaphore must be taken before accessing the tcpsend function
-		sys_arch_sem_wait(&tcpsem, 500);
+		sys_arch_sem_wait(&tcpsem, 50);
 		// send the data to the server
 		tcpsend(smsgc);
 		osDelay(500);

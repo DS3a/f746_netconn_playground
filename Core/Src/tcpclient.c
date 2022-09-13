@@ -48,6 +48,10 @@ float *fun(char string[])
 // Function to send the data to the server
 void tcpsend (char *data);
 
+void set_idx(int ix) {
+	indx = ix;
+}
+
 float *get_linear_x() {
     return &linear_x;
 }
@@ -103,8 +107,8 @@ static void tcpinit_thread(void *arg)
 							float *linx = fun(msgc);
 							linear_x = *(linx);
 							angular_z = *(linx+1);
+
 							// Or modify the message received, so that we can send it back to the server
-							sprintf (smsgc, "Server: ", msgc);
 
 							// semaphore must be taken before accessing the tcpsend function
 							sys_arch_sem_wait(&tcpsem, 5);

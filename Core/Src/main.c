@@ -414,8 +414,9 @@ void start_motor_control(void *argument)
 	uint8_t MSG[35] = {'\0'};
   /* Infinite loop */
   for(;;)
-  {/*
-    float *del = get_linear_x();
+  {
+    float *del = get_angular_z();
+    /*
     if (*del >= 0) {
     	*del = 0;
     }
@@ -424,8 +425,8 @@ void start_motor_control(void *argument)
     if (dela == 0) {
     	dela = 10;
     }*/
-    sprintf(MSG, "Hello world", 23.2);
-    HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 19);
+    int m = (*del) * 100;
+	set_idx(m);
     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
     osDelay(100);
   }

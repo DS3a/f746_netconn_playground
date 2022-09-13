@@ -6,8 +6,8 @@
 ../Core/Src/main.c:280:13:MX_GPIO_Init	56	static
 ../Core/Src/main.c:315:6:netconn_init	24	static
 ../Core/Src/main.c:339:6:start_conn_handler	16	static
-../Core/Src/main.c:410:6:start_motor_control	56	static
-../Core/Src/main.c:442:6:start_tcp_thread	24	static
-../Core/Src/main.c:459:6:MPU_Config	24	static
-../Core/Src/main.c:494:6:HAL_TIM_PeriodElapsedCallback	16	static
-../Core/Src/main.c:511:6:Error_Handler	4	static,ignoring_inline_asm
+../Core/Src/main.c:410:6:start_motor_control	64	static
+../Core/Src/main.c:443:6:start_tcp_thread	24	static
+../Core/Src/main.c:460:6:MPU_Config	24	static
+../Core/Src/main.c:495:6:HAL_TIM_PeriodElapsedCallback	16	static
+../Core/Src/main.c:512:6:Error_Handler	4	static,ignoring_inline_asm

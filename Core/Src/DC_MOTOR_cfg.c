@@ -13,7 +13,7 @@ const DC_MOTOR_CfgType DC_MOTOR_CfgParam[DC_MOTOR_UNITS]=
 
 		{
 				GPIOA,
-				GPIO_PIN_7,
+				GPIO_PIN_5,
 				TIM3,
 				TIM_CHANNEL_1,
 				72,

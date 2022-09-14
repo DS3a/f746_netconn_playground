@@ -76,6 +76,8 @@ struct netconn *conn, *newconn;
 uint8_t listening = 0;
 uint8_t connected = 0;
 
+uint8_t motor_dir;
+uint16_t motor_speed;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -384,15 +386,6 @@ void start_motor_control(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    /*
-    if (*del >= 0) {
-    	*del = 0;
-    }
-    (*del)*=100;
-    int dela = (int)(*del);
-    if (dela == 0) {
-    	dela = 10;
-    }*/
     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
     osDelay(100);
   }
@@ -438,6 +431,10 @@ void start_control_systems(void *argument)
   /* Infinite loop */
   for(;;)
   {
+	float angular_z = *angular_z_ptr;
+	if (angular_z > 0) {
+//		motor_dir = DIR_ACW;
+	}
     int m = (*linear_x_ptr) * 100;
     set_idx(m);
 

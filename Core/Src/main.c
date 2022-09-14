@@ -43,8 +43,6 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-UART_HandleTypeDef huart2;
-
 /* Definitions for conn_handler */
 osThreadId_t conn_handlerHandle;
 const osThreadAttr_t conn_handler_attributes = {
@@ -66,6 +64,13 @@ const osThreadAttr_t tcp_thread_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityRealtime7,
 };
+/* Definitions for control_systems */
+osThreadId_t control_systemsHandle;
+const osThreadAttr_t control_systems_attributes = {
+  .name = "control_systems",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityRealtime7,
+};
 /* USER CODE BEGIN PV */
 struct netconn *conn, *newconn;
 uint8_t listening = 0;
@@ -77,10 +82,10 @@ uint8_t connected = 0;
 void SystemClock_Config(void);
 static void MPU_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_USART2_UART_Init(void);
 void start_conn_handler(void *argument);
 void start_motor_control(void *argument);
 void start_tcp_thread(void *argument);
+void start_control_systems(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -128,7 +133,6 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -161,6 +165,9 @@ int main(void)
 
   /* creation of tcp_thread */
   tcp_threadHandle = osThreadNew(start_tcp_thread, NULL, &tcp_thread_attributes);
+
+  /* creation of control_systems */
+  control_systemsHandle = osThreadNew(start_control_systems, NULL, &control_systems_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -238,41 +245,6 @@ void SystemClock_Config(void)
 }
 
 /**
-  * @brief USART2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USART2_UART_Init(void)
-{
-
-  /* USER CODE BEGIN USART2_Init 0 */
-
-  /* USER CODE END USART2_Init 0 */
-
-  /* USER CODE BEGIN USART2_Init 1 */
-
-  /* USER CODE END USART2_Init 1 */
-  huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
-  huart2.Init.WordLength = UART_WORDLENGTH_8B;
-  huart2.Init.StopBits = UART_STOPBITS_1;
-  huart2.Init.Parity = UART_PARITY_NONE;
-  huart2.Init.Mode = UART_MODE_TX_RX;
-  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-  huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-  huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  if (HAL_UART_Init(&huart2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART2_Init 2 */
-
-  /* USER CODE END USART2_Init 2 */
-
-}
-
-/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -286,7 +258,6 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOG_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
@@ -410,12 +381,9 @@ void start_conn_handler(void *argument)
 void start_motor_control(void *argument)
 {
   /* USER CODE BEGIN start_motor_control */
-	MX_USART2_UART_Init();
-	uint8_t MSG[35] = {'\0'};
   /* Infinite loop */
   for(;;)
   {
-    float *del = get_angular_z();
     /*
     if (*del >= 0) {
     	*del = 0;
@@ -425,8 +393,6 @@ void start_motor_control(void *argument)
     if (dela == 0) {
     	dela = 10;
     }*/
-    int m = (*del) * 100;
-	set_idx(m);
     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
     osDelay(100);
   }
@@ -450,9 +416,34 @@ void start_tcp_thread(void *argument)
   /* Infinite loop */
   for(;;)
   {
+
     osDelay(1);
   }
   /* USER CODE END start_tcp_thread */
+}
+
+/* USER CODE BEGIN Header_start_control_systems */
+/**
+* @brief Function implementing the control_systems thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_start_control_systems */
+void start_control_systems(void *argument)
+{
+  /* USER CODE BEGIN start_control_systems */
+  float *linear_x_ptr = get_linear_x();
+  float *angular_z_ptr = get_angular_z();
+
+  /* Infinite loop */
+  for(;;)
+  {
+    int m = (*linear_x_ptr) * 100;
+    set_idx(m);
+
+    osDelay(1);
+  }
+  /* USER CODE END start_control_systems */
 }
 
 /* MPU Configuration */

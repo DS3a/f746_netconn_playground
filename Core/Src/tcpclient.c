@@ -95,8 +95,8 @@ static void tcpinit_thread(void *arg)
 					if (netconn_recv(conn, &buf) == ERR_OK)
 					{
 						/* Extract the address and port in case they are required */
-						addr = netbuf_fromaddr(buf);  // get the address of the client
-						port = netbuf_fromport(buf);  // get the Port of the client
+//						addr = netbuf_fromaddr(buf);  // get the address of the client
+//						port = netbuf_fromport(buf);  // get the Port of the client
 
 						/* If there is some data remaining to be sent, the following process will continue */
 						do
@@ -111,10 +111,10 @@ static void tcpinit_thread(void *arg)
 							// Or modify the message received, so that we can send it back to the server
 
 							// semaphore must be taken before accessing the tcpsend function
-							sys_arch_sem_wait(&tcpsem, 5);
-
-							// send the data to the TCP Server
-							tcpsend (smsgc);
+//							sys_arch_sem_wait(&tcpsem, 5);
+//
+//							// send the data to the TCP Server
+//							tcpsend (smsgc);
 
 							memset (msgc, '\0', 100);  // clear the buffer
 						}
@@ -155,10 +155,10 @@ static void tcpsend_thread (void *arg)
 	{
 		sprintf (smsgc, "index value = %d\n", indx);
 		// semaphore must be taken before accessing the tcpsend function
-		sys_arch_sem_wait(&tcpsem, 50);
+//		sys_arch_sem_wait(&tcpsem, 5);
 		// send the data to the server
 		tcpsend(smsgc);
-		osDelay(500);
+		osDelay(1);
 	}
 }
 

@@ -25,6 +25,8 @@
 /* USER CODE BEGIN Includes */
 #include "lwip/api.h"
 #include "lwip/netbuf.h"
+#include "mdds30.h"
+#include "DC_MOTOR_cfg.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -386,6 +388,7 @@ void start_motor_control(void *argument)
   /* Infinite loop */
   for(;;)
   {
+    set_idx(motor_speed);
     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
     osDelay(100);
   }
@@ -409,7 +412,6 @@ void start_tcp_thread(void *argument)
   /* Infinite loop */
   for(;;)
   {
-
     osDelay(1);
   }
   /* USER CODE END start_tcp_thread */
@@ -433,10 +435,17 @@ void start_control_systems(void *argument)
   {
 	float angular_z = *angular_z_ptr;
 	if (angular_z > 0) {
-//		motor_dir = DIR_ACW;
+		motor_dir = DIR_ACW;
+	} else {
+		motor_dir = DIR_CW;
+		angular_z *= -1;
 	}
+
+	if (angular_z >= 1){
+		angular_z = 1;
+	}
+	motor_speed = 65535*angular_z;
     int m = (*linear_x_ptr) * 100;
-    set_idx(m);
 
     osDelay(1);
   }

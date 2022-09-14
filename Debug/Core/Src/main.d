@@ -75,7 +75,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../LWIP/Target/ethernetif.h \
  ../Middlewares/Third_Party/LwIP/src/include/lwip/tcpip.h \
  ../Middlewares/Third_Party/LwIP/src/include/lwip/api.h \
- ../Middlewares/Third_Party/LwIP/src/include/lwip/netbuf.h
+ ../Middlewares/Third_Party/LwIP/src/include/lwip/netbuf.h \
+ ../Core/Inc/mdds30.h ../Core/Inc/DC_MOTOR_cfg.h ../Core/Inc/mdds30.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal.h:
 ../Core/Inc/stm32f7xx_hal_conf.h:
@@ -154,3 +155,6 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Middlewares/Third_Party/LwIP/src/include/lwip/tcpip.h:
 ../Middlewares/Third_Party/LwIP/src/include/lwip/api.h:
 ../Middlewares/Third_Party/LwIP/src/include/lwip/netbuf.h:
+../Core/Inc/mdds30.h:
+../Core/Inc/DC_MOTOR_cfg.h:
+../Core/Inc/mdds30.h:

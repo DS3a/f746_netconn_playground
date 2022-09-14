@@ -1,0 +1,6 @@
+../Core/Src/mdds30.c:13:6:DC_MOTOR_Init	176	static
+../Core/Src/mdds30.c:69:6:DC_MOTOR_Start	8	static
+../Core/Src/mdds30.c:89:6:DC_MOTOR_Set_Speed	8	static
+../Core/Src/mdds30.c:101:6:DC_MOTOR_Set_Dir	8	static
+../Core/Src/mdds30.c:112:6:DC_MOTOR_Stop	8	static
+../Core/Src/mdds30.c:125:10:DC_MOTOR_Get_MaxFreq	16	static

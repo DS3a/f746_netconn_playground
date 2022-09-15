@@ -45,6 +45,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 
+DAC_HandleTypeDef hdac;
+
 TIM_HandleTypeDef htim3;
 
 /* Definitions for conn_handler */
@@ -82,6 +84,8 @@ uint8_t connected = 0;
 
 uint8_t motor_dir = DIR_ACW;
 uint16_t motor_speed = 0;
+
+float dac_voltage = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -89,6 +93,7 @@ void SystemClock_Config(void);
 static void MPU_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM3_Init(void);
+static void MX_DAC_Init(void);
 void start_conn_handler(void *argument);
 void start_motor_control(void *argument);
 void start_tcp_thread(void *argument);
@@ -141,6 +146,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_TIM3_Init();
+  MX_DAC_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -250,6 +256,46 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief DAC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_DAC_Init(void)
+{
+
+  /* USER CODE BEGIN DAC_Init 0 */
+
+  /* USER CODE END DAC_Init 0 */
+
+  DAC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN DAC_Init 1 */
+
+  /* USER CODE END DAC_Init 1 */
+
+  /** DAC Initialization
+  */
+  hdac.Instance = DAC;
+  if (HAL_DAC_Init(&hdac) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** DAC channel OUT1 config
+  */
+  sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
+  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
+  if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN DAC_Init 2 */
+
+  /* USER CODE END DAC_Init 2 */
+
 }
 
 /**
@@ -439,6 +485,10 @@ void start_conn_handler(void *argument)
 }
 
 /* USER CODE BEGIN Header_start_motor_control */
+void dac_control(float req_voltage) {
+  uint32_t var = req_voltage * (0xff+1)/3.3;
+  HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_8B_R, var);
+}
 /**
 * @brief Function implementing the motor_control thread.
 * @param argument: Not used
@@ -449,11 +499,13 @@ void start_motor_control(void *argument)
 {
   /* USER CODE BEGIN start_motor_control */
   DC_MOTOR_Init(DC_MOTOR_CfgParam[0]);
+  HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
   /* Infinite loop */
   for(;;)
   {
     set_idx(motor_speed);
     DC_MOTOR_Start(DC_MOTOR_CfgParam[0], motor_dir, motor_speed);
+    dac_control(dac_voltage);
 //    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
     osDelay(1);
   }
@@ -512,6 +564,15 @@ void start_control_systems(void *argument)
 	motor_speed = 65535*angular_z;
     int m = (*linear_x_ptr) * 100;
 
+    float linear_x = *linear_x_ptr;
+    if (linear_x < 0) {
+        linear_x *= -1;
+    }
+    if (linear_x > 1) {
+    	linear_x = 1;
+    }
+
+    dac_voltage = linear_x*3.3;
     osDelay(1);
   }
   /* USER CODE END start_control_systems */

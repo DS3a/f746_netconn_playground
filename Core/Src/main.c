@@ -80,8 +80,8 @@ struct netconn *conn, *newconn;
 uint8_t listening = 0;
 uint8_t connected = 0;
 
-uint8_t motor_dir;
-uint16_t motor_speed;
+uint8_t motor_dir = DIR_ACW;
+uint16_t motor_speed = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -448,13 +448,14 @@ void start_conn_handler(void *argument)
 void start_motor_control(void *argument)
 {
   /* USER CODE BEGIN start_motor_control */
+  DC_MOTOR_Init(DC_MOTOR_CfgParam[0]);
   /* Infinite loop */
   for(;;)
   {
-    set_idx(motor_dir);
+    set_idx(motor_speed);
     DC_MOTOR_Start(DC_MOTOR_CfgParam[0], motor_dir, motor_speed);
-    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-    osDelay(100);
+//    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+    osDelay(1);
   }
   /* USER CODE END start_motor_control */
 }

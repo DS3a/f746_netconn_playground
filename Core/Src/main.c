@@ -552,9 +552,9 @@ void start_control_systems(void *argument)
   {
 	float angular_z = *angular_z_ptr;
 	if (angular_z > 0) {
-		motor_dir = DIR_ACW;
-	} else {
 		motor_dir = DIR_CW;
+	} else {
+		motor_dir = DIR_ACW;
 		angular_z *= -1;
 	}
 

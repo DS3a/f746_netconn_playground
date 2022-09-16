@@ -2279,15 +2279,15 @@ void start_control_systems(void *argument)
  8001572:	eef5 7ac0 	vcmpe.f32	s15, #0.0
  8001576:	eef1 fa10 	vmrs	APSR_nzcv, fpscr
  800157a:	dd03      	ble.n	8001584 <start_control_systems+0x34>
-		motor_dir = DIR_ACW;
+		motor_dir = DIR_CW;
  800157c:	4b34      	ldr	r3, [pc, #208]	; (8001650 <start_control_systems+0x100>)
- 800157e:	2200      	movs	r2, #0
+ 800157e:	2201      	movs	r2, #1
  8001580:	701a      	strb	r2, [r3, #0]
  8001582:	e008      	b.n	8001596 <start_control_systems+0x46>
 	} else {
-		motor_dir = DIR_CW;
+		motor_dir = DIR_ACW;
  8001584:	4b32      	ldr	r3, [pc, #200]	; (8001650 <start_control_systems+0x100>)
- 8001586:	2201      	movs	r2, #1
+ 8001586:	2200      	movs	r2, #0
  8001588:	701a      	strb	r2, [r3, #0]
 		angular_z *= -1;
  800158a:	edd7 7a07 	vldr	s15, [r7, #28]

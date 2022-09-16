@@ -23,9 +23,6 @@
 #define DC_MOTOR_PWM_RES 10
 #define DC_MOTOR_F_PWM 500
 
-//The Number of DC motors used
-#define DC_MOTOR_UNITS 1
-
 typedef struct{
 	GPIO_TypeDef *IN_GPIO;
 	uint16_t 	  IN_PIN;

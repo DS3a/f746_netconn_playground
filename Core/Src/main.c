@@ -340,6 +340,10 @@ static void MX_TIM3_Init(void)
   {
     Error_Handler();
   }
+  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
   /* USER CODE BEGIN TIM3_Init 2 */
 
   /* USER CODE END TIM3_Init 2 */
@@ -370,7 +374,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PA5 */
   GPIO_InitStruct.Pin = GPIO_PIN_5;
@@ -386,8 +390,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PC9 */
-  GPIO_InitStruct.Pin = GPIO_PIN_9;
+  /*Configure GPIO pin : PC8 */
+  GPIO_InitStruct.Pin = GPIO_PIN_8;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -498,15 +502,16 @@ void dac_control(float req_voltage) {
 void start_motor_control(void *argument)
 {
   /* USER CODE BEGIN start_motor_control */
+
+	// 0 -> LEFT_MOTOR
+	// 1 -> RIGHT_MOTOR
   DC_MOTOR_Init(DC_MOTOR_CfgParam[0]);
-  HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
+  DC_MOTOR_Init(DC_MOTOR_CfgParam[1]);
   /* Infinite loop */
   for(;;)
   {
     set_idx(motor_speed);
     DC_MOTOR_Start(DC_MOTOR_CfgParam[0], motor_dir, motor_speed);
-    dac_control(dac_voltage);
-//    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
     osDelay(1);
   }
   /* USER CODE END start_motor_control */

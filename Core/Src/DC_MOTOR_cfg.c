@@ -9,7 +9,7 @@
 
 const DC_MOTOR_CfgType DC_MOTOR_CfgParam[DC_MOTOR_UNITS]=
 {
-		//Steering Configurations PA6 TIM 3 CHANNEL 1
+		//Steering Configurations PA5 TIM 3 CHANNEL 1
 
 		{
 				GPIOA,
@@ -21,6 +21,20 @@ const DC_MOTOR_CfgType DC_MOTOR_CfgParam[DC_MOTOR_UNITS]=
 				DC_MOTOR_PWM_RES
 
 		},
+
+		//Steering Configurations PC8 TIM 3 CHANNEL 2
+
+		{
+				GPIOC,
+				GPIO_PIN_8,
+				TIM3,
+				TIM_CHANNEL_2,
+				108,
+				DC_MOTOR_F_PWM,
+				DC_MOTOR_PWM_RES
+
+		},
+
 
 };
 

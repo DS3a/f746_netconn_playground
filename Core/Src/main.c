@@ -27,6 +27,7 @@
 #include "lwip/netbuf.h"
 #include "mdds30.h"
 #include "DC_MOTOR_cfg.h"
+#include "pid.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

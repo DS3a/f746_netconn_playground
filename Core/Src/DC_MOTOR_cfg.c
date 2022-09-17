@@ -7,6 +7,11 @@
 
 #include "mdds30.h"
 
+
+//The Number of DC motors used
+#define DC_MOTOR_UNITS 2
+
+
 const DC_MOTOR_CfgType DC_MOTOR_CfgParam[DC_MOTOR_UNITS]=
 {
 		//Steering Configurations PA5 TIM 3 CHANNEL 1

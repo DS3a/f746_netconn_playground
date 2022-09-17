@@ -59,6 +59,14 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define DAC1_Pin GPIO_PIN_13
+#define DAC1_GPIO_Port GPIOF
+#define DAC4_Pin GPIO_PIN_14
+#define DAC4_GPIO_Port GPIOF
+#define DAC2_Pin GPIO_PIN_9
+#define DAC2_GPIO_Port GPIOE
+#define DAC3_Pin GPIO_PIN_11
+#define DAC3_GPIO_Port GPIOE
 #define LED_Pin GPIO_PIN_14
 #define LED_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */

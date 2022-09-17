@@ -86,6 +86,7 @@ uint8_t motor_dir = DIR_ACW;
 uint16_t motor_speed = 0;
 
 float dac_voltage = 0;
+uint8_t dac_values;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -360,6 +361,8 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOF_CLK_ENABLE();
+  __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOG_CLK_ENABLE();
 
@@ -367,10 +370,13 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOF, DAC1_Pin|DAC4_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, DAC2_Pin|DAC3_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PA5 */
   GPIO_InitStruct.Pin = GPIO_PIN_5;
@@ -379,19 +385,26 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : DAC1_Pin DAC4_Pin */
+  GPIO_InitStruct.Pin = DAC1_Pin|DAC4_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : DAC2_Pin DAC3_Pin */
+  GPIO_InitStruct.Pin = DAC2_Pin|DAC3_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
   /*Configure GPIO pin : LED_Pin */
   GPIO_InitStruct.Pin = LED_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : PC9 */
-  GPIO_InitStruct.Pin = GPIO_PIN_9;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 }
 
@@ -485,10 +498,6 @@ void start_conn_handler(void *argument)
 }
 
 /* USER CODE BEGIN Header_start_motor_control */
-void dac_control(float req_voltage) {
-  uint32_t var = req_voltage * (0xff+1)/3.3;
-  HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_8B_R, var);
-}
 /**
 * @brief Function implementing the motor_control thread.
 * @param argument: Not used
@@ -499,14 +508,36 @@ void start_motor_control(void *argument)
 {
   /* USER CODE BEGIN start_motor_control */
   DC_MOTOR_Init(DC_MOTOR_CfgParam[0]);
-  HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
   /* Infinite loop */
   for(;;)
   {
-    set_idx(motor_speed);
+    set_idx(dac_values);
     DC_MOTOR_Start(DC_MOTOR_CfgParam[0], motor_dir, motor_speed);
-    dac_control(dac_voltage);
-//    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+    dac_values = 32*(dac_voltage/3.3);
+
+    if ((dac_values & 0b0001) == 0b0001) {
+    	HAL_GPIO_WritePin(DAC1_GPIO_Port, DAC1_Pin, GPIO_PIN_SET);
+    } else {
+    	HAL_GPIO_WritePin(DAC1_GPIO_Port, DAC1_Pin, GPIO_PIN_RESET);
+    }
+
+    if ((dac_values & 0b0010) == 0b0010) {
+    	HAL_GPIO_WritePin(DAC2_GPIO_Port, DAC2_Pin, GPIO_PIN_SET);
+    } else {
+    	HAL_GPIO_WritePin(DAC2_GPIO_Port, DAC2_Pin, GPIO_PIN_RESET);
+    }
+
+    if ((dac_values & 0b0100) == 0b0100) {
+    	HAL_GPIO_WritePin(DAC3_GPIO_Port, DAC3_Pin, GPIO_PIN_SET);
+    } else {
+    	HAL_GPIO_WritePin(DAC3_GPIO_Port, DAC3_Pin, GPIO_PIN_RESET);
+    }
+
+    if ((dac_values & 0b1000) == 0b1000) {
+    	HAL_GPIO_WritePin(DAC4_GPIO_Port, DAC4_Pin, GPIO_PIN_SET);
+    } else {
+    	HAL_GPIO_WritePin(DAC4_GPIO_Port, DAC4_Pin, GPIO_PIN_RESET);
+    }
     osDelay(1);
   }
   /* USER CODE END start_motor_control */

@@ -490,10 +490,6 @@ void start_conn_handler(void *argument)
 }
 
 /* USER CODE BEGIN Header_start_motor_control */
-void dac_control(float req_voltage) {
-  uint32_t var = req_voltage * (0xff+1)/3.3;
-  HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_8B_R, var);
-}
 /**
 * @brief Function implementing the motor_control thread.
 * @param argument: Not used

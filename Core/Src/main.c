@@ -78,6 +78,13 @@ const osThreadAttr_t control_systems_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityRealtime7,
 };
+/* Definitions for can_thread */
+osThreadId_t can_threadHandle;
+const osThreadAttr_t can_thread_attributes = {
+  .name = "can_thread",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityRealtime7,
+};
 /* USER CODE BEGIN PV */
 struct netconn *conn, *newconn;
 uint8_t listening = 0;
@@ -99,6 +106,7 @@ void start_conn_handler(void *argument);
 void start_motor_control(void *argument);
 void start_tcp_thread(void *argument);
 void start_control_systems(void *argument);
+void start_can_thread(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -183,6 +191,9 @@ int main(void)
 
   /* creation of control_systems */
   control_systemsHandle = osThreadNew(start_control_systems, NULL, &control_systems_attributes);
+
+  /* creation of can_thread */
+  can_threadHandle = osThreadNew(start_can_thread, NULL, &can_thread_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -341,10 +352,6 @@ static void MX_TIM3_Init(void)
   {
     Error_Handler();
   }
-  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
   /* USER CODE BEGIN TIM3_Init 2 */
 
   /* USER CODE END TIM3_Init 2 */
@@ -365,6 +372,8 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOF_CLK_ENABLE();
+  __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOG_CLK_ENABLE();
 
@@ -372,10 +381,13 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOF, DAC1_Pin|DAC4_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, DAC2_Pin|DAC3_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PA5 */
   GPIO_InitStruct.Pin = GPIO_PIN_5;
@@ -384,19 +396,26 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : DAC1_Pin DAC4_Pin */
+  GPIO_InitStruct.Pin = DAC1_Pin|DAC4_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : DAC2_Pin DAC3_Pin */
+  GPIO_InitStruct.Pin = DAC2_Pin|DAC3_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
   /*Configure GPIO pin : LED_Pin */
   GPIO_InitStruct.Pin = LED_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : PC8 */
-  GPIO_InitStruct.Pin = GPIO_PIN_8;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 }
 
@@ -436,56 +455,6 @@ void start_conn_handler(void *argument)
   for (;;) {
     osDelay(1);
   }
-
-  /*
-  conn = NULL;
-  conn = netconn_new(NETCONN_TCP);
-
-  netconn_init(conn);
-  err_t err;
-
-  struct netbuf *buf;
-  char msg[100];
-  char smsg[200];
-
-  connected = 0;
-
-  for(;;) {
-    osDelay(10);
-
-    err = netconn_accept(conn, &newconn);
-    if (err == ERR_OK) {
-      connected = 1; */
-      // TODO sort the receive function
-      // PROBLEM:
-      /*
-       * The LED stops blinking even though its on a seperate thread
-       *    and the `connected == 1` is changed to `1`
-       *    It is possible that the netconn_recv function is crashing the stm
-       *    TODO gotta look into why that is happening, and how to avoid
-       *    TODO consider switching to client instead of server
-       *    might be lighter
-       * */
-/*
-      while (netconn_recv(newconn, &buf) == ERR_OK) {
-        do {
-          strncpy(msg, buf->p->payload, buf->p->len);
-          int len = sprintf (smsg, "\"%s\" was sent by the Server\n", msg);
-          netconn_write(newconn, smsg, len, NETCONN_COPY);  // send the message back to the client
-          memset (msg, '\0', 100);  // clear the buffer
-        } while(netbuf_next(buf) > 0);
-        netbuf_delete(buf);
-      }*/
-  /*
-    } else
-      connected = 0;
-  }
-
-
-  for(;;) {
-    osDelay(1);
-  }
-  netconn_delete(newconn);*/
   /* USER CODE END 5 */
 }
 
@@ -578,6 +547,24 @@ void start_control_systems(void *argument)
     osDelay(1);
   }
   /* USER CODE END start_control_systems */
+}
+
+/* USER CODE BEGIN Header_start_can_thread */
+/**
+* @brief Function implementing the can_thread thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_start_can_thread */
+void start_can_thread(void *argument)
+{
+  /* USER CODE BEGIN start_can_thread */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END start_can_thread */
 }
 
 /* MPU Configuration */
